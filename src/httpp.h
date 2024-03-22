@@ -6,45 +6,16 @@
 #include <iostream>
 #include <fmt/core.h>
 #include <string>
+#include <string_view>
 #include <curl/curl.h>
-#include <vector>
+#include <map>
 
 namespace httpp
 {   
-    struct httpHeader {
-        std::string key;
-        std::string value;
-    };
-
     enum httpMethods
     {
         GET,
         POST
-    };
-
-    struct httpRequestOptions
-    {
-        std::string url;
-        httpMethods method = GET;
-        std::vector<httpHeader> headers;
-    };
-
-    class httpRequest
-    {
-        CURL *curl;
-        CURLcode status_code;
-        httpRequestOptions options;
-
-    public:
-        httpRequest(const httpRequestOptions &options);
-
-        httpRequest(const httpRequest &) = delete;
-
-    private:
-        ~httpRequest()
-        {
-            curl_easy_cleanup(curl);
-        }
     };
 
     enum httpRedirectOption {
@@ -52,13 +23,48 @@ namespace httpp
         error
     };
 
-    struct httpOptions {
-        std::vector<httpHeader> headers;
+    struct httpRequestOptions {
+        std::string body;
+        std::map<std::string, std::string> headers;
         std::string mode = "cors";
         httpRedirectOption redirect = follow;
-        std::string referrer;  
+        std::string referrer;
     };
 
-    void get(const std::string_view &url, const httpOptions &options = httpOptions{});
+    
+    class httpResponse {
+    public:
+        std::map<std::string, std::string> headers;
+        CURLcode status_code;
+    };
+
+    struct httpOptions
+    {
+        std::string url;
+        std::string body;
+        httpMethods method = GET;
+        httpRedirectOption redirect = follow;
+        std::map<std::string, std::string> headers;
+    };
+
+    class httpRequest
+    {
+    public:
+        CURL *curl;
+        httpOptions options;
+
+        httpRequest(const httpOptions &options);
+
+        httpResponse send();
+
+        httpRequest(const httpRequest &) = delete;
+
+        ~httpRequest()
+        {
+            curl_easy_cleanup(curl);
+        }
+    };
+
+    void get(const std::string_view &url, const httpRequestOptions &options = httpRequestOptions{});
 }
 
