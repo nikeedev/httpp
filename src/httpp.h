@@ -12,12 +12,20 @@
 
 namespace httpp
 {   
+    /*
+        `httpMethods`
+        - Defines the HTTP method, between GET and POST
+    */
     enum httpMethods
     {
         GET,
         POST
     };
 
+    /*
+        `httpRedirectOption`
+        - Whether CURL should follow the connection even if it is moving permanently.
+    */
     enum httpRedirectOption {
         follow,
         error
@@ -35,7 +43,8 @@ namespace httpp
     class httpResponse {
     public:
         std::map<std::string, std::string> headers;
-        CURLcode status_code;
+        int status_code;
+        std::string body;
     };
 
     struct httpOptions
@@ -44,6 +53,7 @@ namespace httpp
         std::string body;
         httpMethods method = GET;
         httpRedirectOption redirect = follow;
+        bool verbose = false;
         std::map<std::string, std::string> headers;
     };
 
@@ -52,6 +62,7 @@ namespace httpp
     public:
         CURL *curl;
         httpOptions options;
+        std::string res_body;
 
         httpRequest(const httpOptions &options);
 
@@ -65,6 +76,6 @@ namespace httpp
         }
     };
 
-    void get(const std::string_view &url, const httpRequestOptions &options = httpRequestOptions{});
+    httpResponse get(const std::string_view &url, const httpRequestOptions &options = httpRequestOptions{});
 }
 
