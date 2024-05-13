@@ -3,13 +3,14 @@
 #include <fstream>
 
 int main() {
-    std::ofstream out("image.png", std::ofstream::out | std::ofstream::trunc);
+    std::ofstream out;
+    out.open("image.png", std::ios::out | std::ios::binary);
 
-    httpp::httpResponse resp = httpp::get("https://nikee.dev/imgr/playdatesdk_screenshot.png");
+    httpp::httpResponse resp = httpp::get("https://picsum.photos/5000");
 
     fmt::print("Status code: {}", resp.status_code);
 
-    out << resp.body.c_str();
+    out.write(resp.body.data(), resp.body.size());
 
     out.close();
 

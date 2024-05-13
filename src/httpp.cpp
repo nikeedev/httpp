@@ -29,6 +29,9 @@ namespace httpp
 			curl_easy_setopt(curl, CURLOPT_VERBOSE, options.verbose ? 1L : 0L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res_body);
+			
+			// if (this->options.url.rfind("https://", 0) == 0)
+			// 	curl_easy_setopt(curl, CURLOPT_PORT, 443L);
 
 			switch (options.redirect)
 			{
@@ -54,13 +57,14 @@ namespace httpp
 
 		code = curl_easy_perform(curl);
 
+		httpResponse response;
+
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
 		if (code != CURLE_OK)
 			fprintf(stderr, "curl_easy_perform() failed: %s\n\nTip: Check the URL, headers or body you have been passing to httpp.\n\n",
 					curl_easy_strerror(code));
 
-		httpResponse response;
-
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
 		response.status_code = response_code;
 		response.body = res_body;
