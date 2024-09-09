@@ -9,6 +9,8 @@
 #include <string_view>
 #include <curl/curl.h>
 #include <map>
+#include <algorithm>
+#include <format>
 
 namespace httpp
 {   
@@ -19,7 +21,9 @@ namespace httpp
     enum httpMethods
     {
         GET,
-        POST
+        POST,
+        PUT,
+        PATCH
     };
 
     /*
@@ -52,9 +56,10 @@ namespace httpp
         std::string url;
         std::string body;
         httpMethods method = GET;
+        std::map<std::string, std::string> headers;
+        std::string cookies;
         httpRedirectOption redirect = follow;
         bool verbose = false;
-        std::map<std::string, std::string> headers;
     };
 
     class httpRequest
@@ -62,7 +67,7 @@ namespace httpp
     public:
         CURL *curl;
         httpOptions options;
-        std::string res_body;
+        std::string response_body;
 
         httpRequest(const httpOptions &options);
 
@@ -77,5 +82,6 @@ namespace httpp
     };
 
     httpResponse get(const std::string_view &url, const httpRequestOptions &options = httpRequestOptions{});
+    httpResponse post(const std::string_view &url, const std::string_view &body, const httpRequestOptions &options = httpRequestOptions{});
 }
 

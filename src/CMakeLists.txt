@@ -18,6 +18,7 @@ find_package(curl CONFIG REQUIRED)
 
 target_link_libraries(httpp PUBLIC fmt::fmt)
 target_link_libraries(httpp PUBLIC CURL::libcurl)
+target_include_directories(httpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET httpp PROPERTY CXX_STANDARD 20)

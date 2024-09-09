@@ -9,6 +9,20 @@ size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 	return size * nmemb;
 }
 
+size_t ReadCallback(char *buffer, size_t size, size_t nitems, std::string *data)
+{
+	size_t len = size * nitems;
+	size_t total_size = data->size();
+	if (total_size > 0)
+	{
+		size_t copy_size = min(len, total_size);
+		memcpy(buffer, data->c_str(), copy_size);
+		data->erase(0, copy_size);
+		return copy_size;
+	}
+	return 0;
+}
+
 namespace httpp
 {
 
@@ -28,10 +42,49 @@ namespace httpp
 			curl_easy_setopt(curl, CURLOPT_URL, this->options.url.c_str());
 			curl_easy_setopt(curl, CURLOPT_VERBOSE, options.verbose ? 1L : 0L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res_body);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);
+
+			switch (this->options.method)
+			{
+			case GET:
+				curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+				break;
+			case POST:
+				curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+				break;
+			case PUT:
+				curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+				break;
+			case PATCH:
+				curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+				break;
+			}
 			
-			// if (this->options.url.rfind("https://", 0) == 0)
-			// 	curl_easy_setopt(curl, CURLOPT_PORT, 443L);
+			if (!this->options.cookies.empty())
+				curl_easy_setopt(curl, CURLOPT_COOKIE, this->options.cookies.c_str());
+
+			// headers:
+
+			struct curl_slist *list = NULL;
+
+			auto headers = this->options.headers;
+
+			for (const auto &[key, value] : headers)
+			{
+				list = curl_slist_append(list, std::format("{}: {}", key, value).c_str());
+				fmt::println("HERE: {}", std::format("{}: {}", key, value));
+			}
+
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+			if (this->options.url.rfind("https://", 0) == 0)
+				curl_easy_setopt(curl, CURLOPT_PORT, 443L);
+
+			if (this->options.method == POST || this->options.method == PATCH || this->options.method == PUT)
+			{
+				curl_easy_setopt(curl, CURLOPT_READFUNCTION, ReadCallback);
+				curl_easy_setopt(curl, CURLOPT_READDATA, &this->options.body);
+			}
 
 			switch (options.redirect)
 			{
@@ -65,9 +118,8 @@ namespace httpp
 			fprintf(stderr, "curl_easy_perform() failed: %s\n\nTip: Check the URL, headers or body you have been passing to httpp.\n\n",
 					curl_easy_strerror(code));
 
-
 		response.status_code = response_code;
-		response.body = res_body;
+		response.body = response_body;
 
 		return response;
 	}
@@ -79,6 +131,24 @@ namespace httpp
 		ops.body = "";
 		ops.headers = options.headers;
 		ops.method = GET;
+		ops.redirect = follow;
+
+		ops.headers.insert({"Referrer", std::string{url}});
+
+		httpRequest req(ops);
+
+		httpResponse resp = req.send();
+
+		return resp;
+	}
+
+	httpResponse post(const std::string_view &url, const std::string_view &body, const httpRequestOptions &options)
+	{
+		httpOptions ops;
+		ops.url = url;
+		ops.body = options.body.empty() ? body : options.body;
+		ops.headers = options.headers;
+		ops.method = POST;
 		ops.redirect = follow;
 
 		ops.headers.insert({"Referrer", std::string{url}});

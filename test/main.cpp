@@ -2,15 +2,20 @@
 #include "httpp.h"
 #include <fstream>
 
+using namespace httpp;
+
 int main() {
+
     std::ofstream out;
-    out.open("image.png", std::ios::out | std::ios::binary);
+    out.open("output.json", std::ios::out | std::ios::binary);
+    
+    auto request = get("https://api.scratch.mit.edu/users/stio_studio");
 
-    httpp::httpResponse resp = httpp::get("https://picsum.photos/5000");
+    fmt::println("Status code: {}", request.status_code);
 
-    fmt::print("Status code: {}", resp.status_code);
+    // fmt::println("Output Body: {}", request.body);
 
-    out.write(resp.body.data(), resp.body.size());
+    out.write(request.body.data(), request.body.size());
 
     out.close();
 
