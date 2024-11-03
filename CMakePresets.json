@@ -5,7 +5,7 @@
             "name": "vcpkg",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
-                    "value": "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                    "value": "${env.VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                     "type": "FILEPATH"
                 }
             }
@@ -27,9 +27,25 @@
             }
         },
         {
+            "name": "linux-base",
+            "hidden": true,
+            "generator": "Ninja", 
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "x64-debug",
             "displayName": "x64 Debug",
-            "inherits": "windows-base",
+            "inherits": "linux-base",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -41,7 +57,7 @@
         {
             "name": "x64-release",
             "displayName": "x64 Release",
-            "inherits": "x64-debug",
+            "inherits": "linux-base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
@@ -49,7 +65,7 @@
         {
             "name": "x86-debug",
             "displayName": "x86 Debug",
-            "inherits": "windows-base",
+            "inherits": "linux-base",
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
