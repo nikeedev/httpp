@@ -15,7 +15,7 @@ size_t ReadCallback(char *buffer, size_t size, size_t nitems, std::string *data)
 	size_t total_size = data->size();
 	if (total_size > 0)
 	{
-		size_t copy_size = min(len, total_size);
+		size_t copy_size = std::min(len, total_size);
 		memcpy(buffer, data->c_str(), copy_size);
 		data->erase(0, copy_size);
 		return copy_size;
@@ -72,7 +72,7 @@ namespace httpp
 			for (const auto &[key, value] : headers)
 			{
 				list = curl_slist_append(list, std::format("{}: {}", key, value).c_str());
-				fmt::println("HERE: {}", std::format("{}: {}", key, value));
+				// fmt::println("HERE: {}", std::format("{}: {}", key, value));
 			}
 
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);

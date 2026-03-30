@@ -1,7 +1,4 @@
-﻿// httpp.h : Include file for standard system include files,
-// or project specific include files.
-
-#pragma once
+﻿#pragma once
 
 #include <iostream>
 #include <fmt/core.h>
