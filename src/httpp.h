@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <iostream>
-#include <fmt/core.h>
 #include <string>
 #include <string_view>
 #include <curl/curl.h>

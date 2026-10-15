@@ -1,4 +1,4 @@
-#include <fmt/core.h>
+#include <cstdio>
 #include "../src/httpp.h"
 #include <fstream>
 
@@ -11,7 +11,7 @@ int main() {
     
     auto request = get("https://api.scratch.mit.edu/users/stio_studio");
 
-    fmt::println("Status code: {}", request.status_code);
+    std::printf("Status code: %d", request.status_code);
 
     // fmt::println("Output Body: {}", request.body);
 
